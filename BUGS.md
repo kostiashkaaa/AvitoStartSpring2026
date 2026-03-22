@@ -168,8 +168,6 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 
 **Окружение:** Production API `https://qa-internship.avito.com`
 
-> **Примечание:** Возможно, статистика доступна только через `/api/1/statistic/:id` (без числового prefixа), тогда это ошибка документации/Postman-коллекции. Протестированы оба варианта.
-
 ---
 
 ## BUG-API-09: GET /api/1/:sellerId/item возвращает пустой список или 404 вместо 200 для продавца с объявлениями
