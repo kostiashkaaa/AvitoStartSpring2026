@@ -1,6 +1,6 @@
-# BUGS.md — Баг-репорты (API)
+# Баг-репорты (API)
 
-> Все баги обнаружены при автоматизированном тестировании API `https://qa-internship.avito.com`
+> API `https://qa-internship.avito.com`
 > Среда: Windows 11, Python 3.13, requests 2.31, pytest 8.0
 
 ---
