@@ -7,16 +7,18 @@ BASE_URL = "https://qa-internship.avito.com"
 def test_create_then_get_by_id():
     seller_id = random.randint(111111, 999999)
     payload = {
-        "sellerID": seller_id,
+        "sellerId": seller_id,
         "name": "E2E Тест объявление",
         "price": 7000,
-        "statistics": {"likes": 0, "viewCount": 0, "contacts": 0},
+        "statistics": {"likes": 1, "viewCount": 1, "contacts": 1},
     }
 
     #Шаг 1: Создать объявление
     create_response = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
     assert create_response.status_code == 200, "Шаг 1: Не удалось создать объявление"
-    item_id = create_response.json().get("id") or create_response.json().get("status")
+    item_id = create_response.json().get("id")
+    if not item_id and "status" in create_response.json():
+        item_id = create_response.json().get("status").split(" - ")[-1]
 
     #Шаг 2: Получить объявление по id
     get_response = requests.get(f"{BASE_URL}/api/1/item/{item_id}", timeout=10)
@@ -32,16 +34,18 @@ def test_create_then_get_by_id():
 def test_create_then_find_in_seller_list():
     seller_id = random.randint(111111, 999999)
     payload = {
-        "sellerID": seller_id,
+        "sellerId": seller_id,
         "name": "Объявление в списке",
         "price": 500,
-        "statistics": {"likes": 0, "viewCount": 0, "contacts": 0},
+        "statistics": {"likes": 1, "viewCount": 1, "contacts": 1},
     }
 
     #Шаг 1: Создать
     create_response = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
     assert create_response.status_code == 200
-    item_id = create_response.json().get("id") or create_response.json().get("status")
+    item_id = create_response.json().get("id")
+    if not item_id and "status" in create_response.json():
+        item_id = create_response.json().get("status").split(" - ")[-1]
 
     #Шаг 2: Получить список продавца
     list_response = requests.get(f"{BASE_URL}/api/1/{seller_id}/item", timeout=10)
@@ -58,7 +62,7 @@ def test_create_then_get_statistics():
     seller_id = random.randint(111111, 999999)
     stats = {"likes": 5, "viewCount": 30, "contacts": 2}
     payload = {
-        "sellerID": seller_id,
+        "sellerId": seller_id,
         "name": "Объявление для статистики",
         "price": 1200,
         "statistics": stats,
@@ -67,7 +71,9 @@ def test_create_then_get_statistics():
     #Шаг 1: Создать
     create_response = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
     assert create_response.status_code == 200
-    item_id = create_response.json().get("id") or create_response.json().get("status")
+    item_id = create_response.json().get("id")
+    if not item_id and "status" in create_response.json():
+        item_id = create_response.json().get("status").split(" - ")[-1]
 
     #Шаг 2: Получить статистику
     stat_response = requests.get(f"{BASE_URL}/api/1/statistic/{item_id}", timeout=10)

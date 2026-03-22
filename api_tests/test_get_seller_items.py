@@ -6,15 +6,18 @@ BASE_URL = "https://qa-internship.avito.com"
 
 def create_item_for_seller(seller_id):
     payload = {
-        "sellerID": seller_id,
+        "sellerId": seller_id,
         "name": "Объявление для продавца",
         "price": 3000,
-        "statistics": {"likes": 1, "viewCount": 5, "contacts": 0},
+        "statistics": {"likes": 1, "viewCount": 5, "contacts": 2},
     }
     response = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
     assert response.status_code == 200
     data = response.json()
-    return data.get("id") or data.get("status")
+    item_id = data.get("id")
+    if not item_id and "status" in data:
+        item_id = data["status"].split(" - ")[-1]
+    return item_id
 
 
 #Позитивные тесты

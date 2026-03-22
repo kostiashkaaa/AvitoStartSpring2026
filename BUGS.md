@@ -13,7 +13,7 @@
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 123456, "name": "", "price": 1000, "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 123456, "name": "", "price": 1000, "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200, создаётся объявление с пустым именем.
@@ -34,7 +34,7 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 123456, "name": "Test", "price": -1, "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 123456, "name": "Test", "price": -1, "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200, объявление создаётся с `price: -1`.
@@ -55,7 +55,7 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 123456, "name": "Test", "price": 100, "statistics": {"likes": -5, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 123456, "name": "Test", "price": 100, "statistics": {"likes": -5, "viewCount": 0, "contacts": 0}}'
 ```
 
 **Фактический результат:** HTTP 200, объявление создано.
@@ -68,20 +68,20 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 
 ---
 
-## BUG-API-04: POST /api/1/item принимает sellerID = 0 → 200 вместо 400
+## BUG-API-04: POST /api/1/item принимает sellerId = 0 → 200 вместо 400
 
-**Краткое описание:** `sellerID: 0` является невалидным значением, однако сервер принимает его без ошибки.
+**Краткое описание:** `sellerId: 0` является невалидным значением, однако сервер принимает его без ошибки.
 
 **Шаги воспроизведения:**
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 0, "name": "Test", "price": 100, "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 0, "name": "Test", "price": 100, "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200, объявление создано с `sellerId: 0`.
 
-**Ожидаемый результат:** HTTP 400 — sellerID = 0 невалидный идентификатор.
+**Ожидаемый результат:** HTTP 400 — sellerId = 0 невалидный идентификатор.
 
 **Серьёзность:** Minor (P2)
 
@@ -97,7 +97,7 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 123456, "price": 1000, "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 123456, "price": 1000, "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200, объявление создано без имени.
@@ -118,7 +118,7 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 123456, "name": "Test", "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 123456, "name": "Test", "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200.
@@ -139,7 +139,7 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"sellerID": 123456, "name": "Test", "price": "not_a_number", "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"sellerId": 123456, "name": "Test", "price": "not_a_number", "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200 (или принимает строку без ошибки типа).
@@ -172,12 +172,12 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 
 ---
 
-## BUG-API-09: GET /api/1/:sellerID/item возвращает пустой список или 404 вместо 200 для продавца с объявлениями
+## BUG-API-09: GET /api/1/:sellerId/item возвращает пустой список или 404 вместо 200 для продавца с объявлениями
 
 **Краткое описание:** После создания объявлений для конкретного `sellerId`, запрос всех объявлений этого продавца иногда возвращает пустой список `[]` или 404, хотя объявления существуют.
 
 **Шаги воспроизведения:**
-1. `POST /api/1/item` с `sellerID: 123456`
+1. `POST /api/1/item` с `sellerId: 123456`
 2. `GET /api/1/123456/item`
 
 **Фактический результат:** `[]` или 404.
@@ -190,21 +190,42 @@ curl -X POST https://qa-internship.avito.com/api/1/item \
 
 ---
 
-## BUG-API-10: POST /api/1/item — отсутствует поле sellerID не вызывает ошибки валидации
+## BUG-API-10: POST /api/1/item — отсутствует поле sellerId не вызывает ошибки валидации
 
-**Краткое описание:** Объявление создаётся без `sellerID` — основного идентификатора продавца.
+**Краткое описание:** Объявление создаётся без `sellerId` — основного идентификатора продавца.
 
 **Шаги воспроизведения:**
 ```bash
 curl -X POST https://qa-internship.avito.com/api/1/item \
   -H 'Content-Type: application/json' \
-  -d '{"name": "Test", "price": 100, "statistics": {"likes": 0, "viewCount": 0, "contacts": 0}}'
+  -d '{"name": "Test", "price": 100, "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
 ```
 
 **Фактический результат:** HTTP 200, объявление создано без sellerId.
 
-**Ожидаемый результат:** HTTP 400 — `sellerID` обязательное поле.
+**Ожидаемый результат:** HTTP 400 — `sellerId` обязательное поле.
 
 **Серьёзность:** Critical (P0)
+
+**Окружение:** Production API `https://qa-internship.avito.com`
+
+---
+
+## BUG-API-11: POST /api/1/item возвращает 400 для цены price=0, но 200 для price=-100
+
+**Краткое описание:** При передаче цены `price: 0` (например, товар отдают бесплатно) сервер возвращает ошибку валидации 400. Однако, если передать `price: -100` (как в BUG-API-02), сервер возвращает успешный статус 200. Вероятнее всего на бэкенде некорректно реализована логика проверки: `if not req.price:` отсеивает `0` как пустое значение.
+
+**Шаги воспроизведения:**
+```bash
+curl -X POST https://qa-internship.avito.com/api/1/item \
+  -H 'Content-Type: application/json' \
+  -d '{"sellerId": 123456, "name": "Free item", "price": 0, "statistics": {"likes": 1, "viewCount": 1, "contacts": 1}}'
+```
+
+**Фактический результат:** HTTP 400 Bad Request.
+
+**Ожидаемый результат:** HTTP 200 (или 201), объявление успешно создано с ценой 0. Либо если 0 запрещен, то -100 тоже должно быть запрещено.
+
+**Серьёзность:** Major (P1)
 
 **Окружение:** Production API `https://qa-internship.avito.com`

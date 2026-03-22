@@ -8,7 +8,7 @@ BASE_URL = "https://qa-internship.avito.com"
 def create_item_with_stats(likes=5, view_count=20, contacts=3):
     seller_id = random.randint(111111, 999999)
     payload = {
-        "sellerID": seller_id,
+        "sellerId": seller_id,
         "name": "Объявление со статистикой",
         "price": 1500,
         "statistics": {
@@ -20,7 +20,10 @@ def create_item_with_stats(likes=5, view_count=20, contacts=3):
     response = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
     assert response.status_code == 200
     data = response.json()
-    return data.get("id") or data.get("status"), payload
+    item_id = data.get("id")
+    if not item_id and "status" in data:
+        item_id = data["status"].split(" - ")[-1]
+    return item_id, payload
 
 
 #Позитивные тесты

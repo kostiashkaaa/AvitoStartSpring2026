@@ -6,13 +6,13 @@ BASE_URL = "https://qa-internship.avito.com"
 
 def make_payload(seller_id=None, name="Котёнок персидский", price=5000):
     return {
-        "sellerID": seller_id or random.randint(111111, 999999),
+        "sellerId": seller_id or random.randint(111111, 999999),
         "name": name,
         "price": price,
         "statistics": {
-            "likes": 0,
-            "viewCount": 0,
-            "contacts": 0,
+            "likes": 1,
+            "viewCount": 1,
+            "contacts": 1,
         },
     }
 
@@ -39,15 +39,23 @@ def test_create_item_two_requests_give_different_ids():
     response2 = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
     assert response1.status_code == 200
     assert response2.status_code == 200
-    id1 = response1.json().get("id") or response1.json().get("status")
-    id2 = response2.json().get("id") or response2.json().get("status")
+    id1 = response1.json().get("id")
+    if not id1 and "status" in response1.json():
+        id1 = response1.json().get("status").split(" - ")[-1]
+    
+    id2 = response2.json().get("id")
+    if not id2 and "status" in response2.json():
+        id2 = response2.json().get("status").split(" - ")[-1]
     assert id1 != id2, "Каждое объявление должно получать уникальный id"
 
 
 def test_create_item_with_zero_price():
+    """[BUG: сервер возвращает 400 вместо 200 из-за того что 0 считается пустым значением]"""
     payload = make_payload(price=0)
     response = requests.post(f"{BASE_URL}/api/1/item", json=payload, timeout=10)
-    assert response.status_code == 200
+    assert response.status_code == 200, (
+        f"[BUG] Ожидался 200 для price=0 (бесплатно), получили {response.status_code}"
+    )
 
 
 def test_create_item_response_time_is_acceptable():
