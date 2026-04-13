@@ -64,7 +64,7 @@ def test_get_statistic_values_match_created():
     assert stat["contacts"] == expected["contacts"], f"contacts: {stat['contacts']} != {expected['contacts']}"
 
 
-# --- Негативные тесты ---
+#Негативные тесты
 
 def test_get_statistic_nonexistent_id_returns_404():
     fake_id = str(uuid.uuid4())
