@@ -17,7 +17,7 @@ def make_payload(seller_id=None, name="Котёнок персидский", pri
     }
 
 
-# --- Позитивные тесты ---
+#Позитивные тесты
 
 def test_create_item_success():
     response = requests.post(f"{BASE_URL}/api/1/item", json=make_payload(), timeout=10)
@@ -65,7 +65,7 @@ def test_create_item_response_time_is_acceptable():
     )
 
 
-# --- Негативные тесты ---
+#Негативные тесты
 
 def test_create_item_without_name_returns_error():
     """[BUG: сервер возвращает 200 вместо 400]"""
